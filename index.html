@@ -130,9 +130,17 @@
         }
 
         button:disabled {
-            background: #3a3d41;
-            color: #757575;
+            background: #3a3d41 !important;
+            color: #999999 !important;
             cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: #2d8a49;
+        }
+
+        .btn-success:hover {
+            background: #36a657;
         }
 
         .progress-container {
@@ -195,7 +203,7 @@
             </div>
             <div class="card">
                 <span class="step-title"><span class="step-badge">3</span>Deployment</span>
-                <button id="flashBtn" disabled style="background: #2d8a49;">EXECUTE FLASHING</button>
+                <button id="flashBtn" class="btn-success" disabled>EXECUTE FLASHING</button>
             </div>
         </div>
 
@@ -239,7 +247,8 @@
                 select.innerHTML = '<option value="">-- Select from GitHub --</option>';
                 hexAssets.forEach(asset => {
                     const opt = document.createElement('option');
-                    opt.value = asset.url;
+                    // Reverted to browser_download_url for external proxy
+                    opt.value = asset.browser_download_url;
                     opt.textContent = `${asset.name} (${data.tag_name})`;
                     select.appendChild(opt);
                 });
@@ -253,7 +262,9 @@
         async function fetchHex(url) {
             debugLog(`Downloading firmware...`, "info");
             try {
-                const response = await fetch(url, { headers: { 'Accept': 'application/octet-stream' } });
+                // Use reliable external CORS proxy for GitHub releases
+                const proxyUrl = "https://api.codetabs.com/v1/proxy?quest=" + url;
+                const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 return await response.text();
             } catch (e) { throw new Error(`Download Failed: ${e.message}`); }
